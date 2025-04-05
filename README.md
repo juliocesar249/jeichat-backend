@@ -2,8 +2,9 @@
 
 - [x] Dividir API e Servidor
 - [x] Passar para NodeJS
-- [ ] Implementar classes de usuario
+- [ ] Implementar classes de usuario ◀
 - [ ] Usar Sets para a lista de usuários
+- [ ] Implementar padrão de projeto MVC
 - [ ] Implementar JWT
 - [ ] Acrescentar Hashs a senhas
 - [ ] Perguntar chat (gpt ou deep): o que são websockets?
