@@ -5,9 +5,9 @@ url = 'http://localhost:3000/logar'
 
 sg.theme('Dark Blue 3')
 layout = [
-    [sg.Text('Nome de Usuario: '), sg.Input(key='nome', size=(20, 1))],
-    [sg.Text('Senha: '), sg.Input(key='senha', password_char='*', size=(20, 1))],
-    [sg.Button('Entrar', key='logar')]
+    [sg.Text('Email:', font=('monospace', 15)), sg.Input(key='email', size=(20, 1), font=('monospace', 15))],
+    [sg.Text('Senha:', font=('monospace', 15)), sg.Input(key='senha', password_char='*', size=(20, 1), font=('monospace', 15))],
+    [sg.Button('Entrar', key='logar', font=('Monospace', 15))]
 ]
 
 janela = sg.Window('Login', layout)
@@ -17,15 +17,15 @@ while True:
     if evento == sg.WINDOW_CLOSED:
         break;
     
-    if evento == 'logar' and len(valores['nome']) == 0 or len(valores['senha']) == 0:
+    if evento == 'logar' and len(valores['email']) == 0 or len(valores['senha']) == 0:
         sg.popup('Preencha todos os campos', title='Aviso', text_color='white', background_color='red')
     else:
-        login = {'nome': valores['nome'], 'senha': valores['senha']}
+        login = {'email': valores['email'], 'senha': valores['senha']}
         try:
             resposta = requests.post(url, json=login)
             if resposta.json()['codigo'] == 1:
-                sg.popup(resposta.json()['mensagem'], title='Aviso')
+                sg.popup(resposta.json()['mensagem'], title='Aviso', font=('Monospace', 15))
             elif resposta.json()['codigo'] == 0:
-                sg.popup(resposta.json()['mensagem'], title='Aviso')
+                sg.popup(resposta.json()['mensagem'], title='Aviso', font=('Monospace', 15))
         except requests.exceptions.RequestException as e:
             print(f'Falha ao enviar os dados: {e}')

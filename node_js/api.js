@@ -29,8 +29,9 @@ app.post('/cadastro', async (req, res) => {
         const resposta = await fetchResponse.json();
         res.json(resposta);
     } catch(err) {
-        console.log(`Erro ao se comunicar com o servidor: ${err}`);
+        console.log(`Erro ao se comunicar com o servidor: ${err.message}`);
         res.json({"codigo": 0, "mensagem": "Erro ao se comunicar com o servidor!"});
+        throw new Error(err);
     }
     return;
 });

@@ -2,9 +2,10 @@ import express from 'express';
 import cors from 'cors';
 const app = express();
 import { config } from 'dotenv';
+import Usuario from './Usuario.js';
+import validator from 'validator';
 
 console.clear();
-
 config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -24,38 +25,53 @@ app.get('/usuarios', (req, res) => {
     return;
 });
 
-// Adicionar novos usuários
+// Adiciona novos usuários
 app.post('/usuarios/cadastrar', (req, res) => {
     try{
-        const novoUsuario = req.body;
+        const dados = req.body;
+        const { nome, data, email, senha } = dados;
 
-        for(let i = 0; i < usuarios.length; i++) {
-            if(usuarios[i].nome === novoUsuario.nome && usuarios[i].senha === novoUsuario.senha) {
-                res.json({'codigo': 0, 'mensagem': 'Usuário já existe!'})
-                return;
-            }
+        if(!nome || !data || !email || !senha) {
+            res.json({'codigo': 0, 'mensagem': 'Preencha todos os campos!'});
+            return;
+        } else if(!validator.isEmail(email)) {
+            res.json({'codigo': 0, 'mensagem': 'Email inválido!'});
+            return;
+        } else if(usuarios.some(usuario => usuario.email === email)) {
+            res.json({'codigo': 0, 'mensagem': 'Este email já está registrado!'});
+            return;
+        } else if(isNaN(new Date(data)) || new Date(data) > new Date()) {
+            res.json({'codigo': 0, 'mensagem':'Data inválida! Formato aceito: (mes/dia/ano)'});
+            return;
         }
 
-        usuarios.push(novoUsuario);
+        usuarios.push(new Usuario(nome, email, senha, data));
         res.json({'codigo': 1, 'mensagem': 'Usuário adicionado com sucesso!'});
-        return;
     } catch (err) {
-        res.send('Falha ao adicionar novo usuário:', err);
+        res.json({'codigo': 0, 'mensagem': err.message});
+        console.log('Falha ao adicionar usuário!');
+        throw new Error(err);
     }
-    return;
 });
 
-// Logar usuario
+// Loga o usuario
 app.post('/usuarios/login', (req, res) => {
     const dados = req.body;
-    const nome = dados.nome;
-    const senha = dados.senha;
+    const { email, senha } = dados;
 
-    const usuario = usuarios.find(usuario => usuario.nome === nome);
+    if(!email || !senha) {
+        res.json({'codigo': 0, 'mensagem': 'Preencha todos os campos!'});
+        return;
+    } else if(!validator.isEmail(email)) {
+        res.json({'codigo': 0, 'mensagem': 'Email inválido!'});
+        return;
+    }
+
+    const usuario = usuarios.find(usuario => usuario.email === email);
 
     if(!usuario) {
         res.json({codigo: 0, mensagem: "Usuario não existe!"});
-    } else if(usuario.senha !== senha) {
+    } else if(!usuario.autenticaUsuario(senha)) {
         res.json({codigo: 0, mensagem: "Senha incorreta!"});
     } else {
         res.json({codigo: 1, mensagem: "Logado com sucesso!"});
@@ -64,4 +80,4 @@ app.post('/usuarios/login', (req, res) => {
     return;
 });
 
-app.listen(5000, () => console.log('Servidor aberto em http://localhost:5000'))
+app.listen(5000, () => console.log('Servidor aberto em http://localhost:5000'));
