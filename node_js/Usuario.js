@@ -1,17 +1,18 @@
 import validator from "validator";
+import bcrypt from 'bcrypt';
 export default class Usuario {
     #senha;
 
-    constructor(nome, email, senha, anoNascimento) {
+    constructor(nome, email, anoNascimento) {
         this.nome = nome;
         this.anoNascimento = new Date(anoNascimento);
         this.email = email;
-        this.senha = senha;
     }
 
-    set senha(senha){
+    async definirSenha(senha){
         Usuario.validaSenha(senha);
-        this.#senha = senha;
+        const salt = await bcrypt.genSalt(10);
+        this.#senha = await bcrypt.hash(senha, salt);
     }
 
     static validaSenha(senha) {
@@ -22,7 +23,7 @@ export default class Usuario {
         return senha;
     }
 
-    autenticaUsuario(senha) {
-        return this.#senha === senha;
+    async autenticaUsuario(senha) {
+        return await bcrypt.compare(senha, this.#senha);
     }
 }

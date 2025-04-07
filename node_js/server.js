@@ -6,6 +6,7 @@ import Usuario from './Usuario.js';
 import validator from 'validator';
 
 console.clear();
+
 config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -26,7 +27,7 @@ app.get('/usuarios', (req, res) => {
 });
 
 // Adiciona novos usuários
-app.post('/usuarios/cadastrar', (req, res) => {
+app.post('/usuarios/cadastrar', async (req, res) => {
     try{
         const dados = req.body;
         const { nome, data, email, senha } = dados;
@@ -44,8 +45,11 @@ app.post('/usuarios/cadastrar', (req, res) => {
             res.json({'codigo': 0, 'mensagem':'Data inválida! Formato aceito: (mes/dia/ano)'});
             return;
         }
-
-        usuarios.push(new Usuario(nome, email, senha, data));
+        
+        const novoUsuario = new Usuario(nome, email, data);
+        await novoUsuario.definirSenha(senha);
+        usuarios.push(novoUsuario);
+        
         res.json({'codigo': 1, 'mensagem': 'Usuário adicionado com sucesso!'});
     } catch (err) {
         res.json({'codigo': 0, 'mensagem': err.message});
@@ -55,7 +59,7 @@ app.post('/usuarios/cadastrar', (req, res) => {
 });
 
 // Loga o usuario
-app.post('/usuarios/login', (req, res) => {
+app.post('/usuarios/login', async (req, res) => {
     const dados = req.body;
     const { email, senha } = dados;
 
@@ -71,7 +75,7 @@ app.post('/usuarios/login', (req, res) => {
 
     if(!usuario) {
         res.json({codigo: 0, mensagem: "Usuario não existe!"});
-    } else if(!usuario.autenticaUsuario(senha)) {
+    } else if(!await usuario.autenticaUsuario(senha)) {
         res.json({codigo: 0, mensagem: "Senha incorreta!"});
     } else {
         res.json({codigo: 1, mensagem: "Logado com sucesso!"});
