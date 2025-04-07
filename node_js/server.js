@@ -4,16 +4,23 @@ const app = express();
 import { config } from 'dotenv';
 import Usuario from './Usuario.js';
 import validator from 'validator';
+import { Low } from 'lowdb';
+import { JSONFile } from 'lowdb/node';
+import {join, dirname} from 'path';
+import { fileURLToPath } from 'url';
 
 console.clear();
 
 config();
 const SECRET_KEY = process.env.SECRET_KEY;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const file = join(__dirname, 'usuarios.json');
 
 app.use(express.json());
 app.use(cors());
-
-const usuarios = [];
+const adapter = new JSONFile(file);
+const db = new Low(adapter, {usuarios: []});
 
 // Mensagem de abertura
 app.get('/', (req, res) => {
@@ -21,14 +28,16 @@ app.get('/', (req, res) => {
 });
 
 // Lista de usuários
-app.get('/usuarios', (req, res) => {
-    res.json(usuarios);
+app.get('/usuarios', async (req, res) => {
+    await db.read();
+    res.json(db.data.usuarios);
     return;
 });
 
 // Adiciona novos usuários
 app.post('/usuarios/cadastrar', async (req, res) => {
     try{
+        await db.read();
         const dados = req.body;
         const { nome, data, email, senha } = dados;
 
@@ -38,17 +47,19 @@ app.post('/usuarios/cadastrar', async (req, res) => {
         } else if(!validator.isEmail(email)) {
             res.json({'codigo': 0, 'mensagem': 'Email inválido!'});
             return;
-        } else if(usuarios.some(usuario => usuario.email === email)) {
+        } else if(db.data.usuarios.some(usuario => usuario.email === email)) {
             res.json({'codigo': 0, 'mensagem': 'Este email já está registrado!'});
             return;
         } else if(isNaN(new Date(data)) || new Date(data) > new Date()) {
             res.json({'codigo': 0, 'mensagem':'Data inválida! Formato aceito: (mes/dia/ano)'});
             return;
         }
-        
+
         const novoUsuario = new Usuario(nome, email, data);
-        await novoUsuario.definirSenha(senha);
-        usuarios.push(novoUsuario);
+        await novoUsuario.definirSenha(senha)
+
+        await db.data.usuarios.push(novoUsuario.toJSON());
+        await db.write();
         
         res.json({'codigo': 1, 'mensagem': 'Usuário adicionado com sucesso!'});
     } catch (err) {
@@ -60,6 +71,7 @@ app.post('/usuarios/cadastrar', async (req, res) => {
 
 // Loga o usuario
 app.post('/usuarios/login', async (req, res) => {
+    await db.read();
     const dados = req.body;
     const { email, senha } = dados;
 
@@ -71,7 +83,8 @@ app.post('/usuarios/login', async (req, res) => {
         return;
     }
 
-    const usuario = usuarios.find(usuario => usuario.email === email);
+    const dadosBrutos = db.data.usuarios.find(usuario => usuario.email === email);
+    const usuario = Usuario.fromJSON(dadosBrutos);
 
     if(!usuario) {
         res.json({codigo: 0, mensagem: "Usuario não existe!"});
