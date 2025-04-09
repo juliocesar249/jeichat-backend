@@ -1,7 +1,7 @@
 from PySimpleGUI import PySimpleGUI as sg
 import requests
 
-url = 'http://localhost:3000/logar'
+url = 'http://localhost:5000/api/usuarios/login'
 
 sg.theme('Dark Blue 3')
 layout = [

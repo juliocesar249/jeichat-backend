@@ -1,7 +1,7 @@
 from PySimpleGUI import PySimpleGUI as sg
 import requests
 
-url = 'http://localhost:3000/cadastro'
+url = 'http://localhost:5000/api/usuarios/cadastrar'
 
 #layout cadastro
 sg.theme('Reddit')
