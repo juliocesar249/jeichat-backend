@@ -29,13 +29,7 @@ while True:
             dados = {'nome': nome, 'data': data, 'email': email, 'senha': senha}
             try:
                 resposta = requests.post(url, json=dados, timeout=20)
-                if resposta.json()['codigo'] == 1:
-                    sg.popup('Usuário cadastrado!', title='Aviso', font=('monospace',15))
-                elif resposta.json()['codigo'] == 0:
-                    sg.popup(f'{resposta.json()['mensagem']}', title='Aviso', font=('monospace',15))
-                else:
-                    sg.popup(f'{resposta.json()['mensagem']}', title='Aviso', font=('monospace',15))
-            
+                sg.popup(resposta.json()['mensagem'], title='Aviso', font=('monospace',15))
             except requests.exceptions.RequestException as e:
                 print(f'Erro ao enviar dados: {e}')
         

@@ -1,16 +1,19 @@
 import { validaLogin } from '../helpers/validacao/login.js';
 import autenticaUsuario from '../helpers/autenticaUsuario.js';
-import {getUsuarioPorEmail} from '../dao/usuarioDao.js';
-
-export default async function logaUsuario(email, senha) {
-    validaLogin(email, senha);
-
-    const usuario = await getUsuarioPorEmail(email);
-    console.log(usuario)
-    
-    if(!usuario) {
-        throw new Error("Usuario não existe!");
+import UsuarioNaoEncontrado from '../errors/UsuarioNaoEncontrado.js';
+import SenhaIncorreta from '../errors/SenhaIncorreta.js';
+export default class AuthService {
+    constructor(usuarioDAO) {
+        this.usuarioDAO = usuarioDAO;
     }
 
-    if(!autenticaUsuario(usuario, senha)) throw new Error('Senha incorreta!');
+    async logaUsuario(email, senha) {
+        validaLogin(email, senha);
+        
+        const usuario = await this.usuarioDAO.encontraUsuarioPorEmail(email);
+
+        if(!usuario) throw new UsuarioNaoEncontrado();
+
+        if(!await autenticaUsuario(usuario, senha)) throw new SenhaIncorreta();
+    }
 }

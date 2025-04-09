@@ -1,10 +1,11 @@
 import validator from 'validator';
-import erros from './erros.js';
+import SenhaVazia from '../../errors/SenhaVazia.js';
+import SenhaInvalida from '../../errors/SenhaInvalida.js';
 
 export default function validaSenha(senha, fromLogin=false) {
     if (!senha) {
-        throw new Error(erros.senhaVazia);
+        throw new SenhaVazia()
     } else if(!fromLogin) {
-        if(!validator.isStrongPassword(senha)) throw new Error(erros.senhaInvalida);
+        if(!validator.isStrongPassword(senha)) throw new SenhaInvalida();
     }
 }

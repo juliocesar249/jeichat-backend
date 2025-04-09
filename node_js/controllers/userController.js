@@ -1,41 +1,30 @@
-import logaUsuario from '../services/authService.js';
-import { adicionaUsuario } from '../services/userService.js';
-import { getTodosUsuarios } from '../dao/usuarioDao.js';
+import { cadastroService, authService } from '../config/dependencias.js';
 
 async function usuarios(req, res) {
-
-    res.json(await getTodosUsuarios());
+    
+    res.json(await cadastroService.usuarioDAO.encontrarTodosUsuarios());
     return;
 }
 
 async function cadastro(req, res) {
-    try{
-            const dados = req.body;
-            const { nome, data, email, senha } = dados;
+
+    const dados = req.body;
+    const { nome, data, email, senha } = dados;
+
+    await cadastroService.cadastraUsuario(nome, data, email, senha);
     
-            await adicionaUsuario(nome, data, email, senha);
-            
-            res.json({'codigo': 1, 'mensagem': 'Usuário adicionado com sucesso!'});
-        } catch (err) {
-            res.json({'codigo': 0, 'mensagem': err.message});
-            console.log('Falha ao adicionar usuário!');
-            throw new Error(err);
-        }
+    res.json({'codigo': 1, 'mensagem': 'Usuário adicionado com sucesso!'});
+    return;
 }
 
 async function login(req, res) {
-    try {
-        const {email, senha} = req.body;
-        
-        await logaUsuario(email, senha);
 
-        res.json({codigo: 1, mensagem: "Logado com sucesso!"});
-        return;
-    } catch(err) {
-        res.json({'codigo': 0, 'mensagem': err.message});
-        console.log('Falha ao logar usuário!');
-        throw new Error(err);
-    }
+    const {email, senha} = req.body;
+    
+    await authService.logaUsuario(email, senha);
+
+    res.json({codigo: 1, mensagem: "Logado com sucesso!"});
+    return;
 }
 
 export {usuarios, cadastro, login};

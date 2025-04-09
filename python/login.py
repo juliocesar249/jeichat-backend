@@ -23,9 +23,6 @@ while True:
         login = {'email': valores['email'], 'senha': valores['senha']}
         try:
             resposta = requests.post(url, json=login)
-            if resposta.json()['codigo'] == 1:
-                sg.popup(resposta.json()['mensagem'], title='Aviso', font=('Monospace', 15))
-            elif resposta.json()['codigo'] == 0:
-                sg.popup(resposta.json()['mensagem'], title='Aviso', font=('Monospace', 15))
+            sg.popup(resposta.json()['mensagem'], title='Aviso', font=('Monospace', 15))
         except requests.exceptions.RequestException as e:
             print(f'Falha ao enviar os dados: {e}')

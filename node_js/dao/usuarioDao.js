@@ -1,51 +1,50 @@
-import {Low} from 'lowdb';
-import {JSONFile} from 'lowdb/node';
-import {join, dirname} from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url+'\\..');
-const __dirname = dirname(__filename);
-const file = join(__dirname, 'usuarios.json');
-
-const adapter = new JSONFile(file);
-const db = new Low(adapter, {usuarios: []});
-
-function buscaUsuarioLocal(email) {
-    return db.data.usuarios.find(u => u.email === email);
-}
-
-export async function getTodosUsuarios() {
-    await db.read();
-    return db.data.usuarios;
-}
-
-export async function getUsuarioPorEmail(email) {
-    await db.read();
-    return db.data.usuarios.find(u => u.email === email);
-}
-
-export async function criaUsuario(usuario) {
-    await db.read();
-    db.data.usuarios.push(usuario);
-    await db.write();
-}
-
-export async function editarUsuario(email, novosDados) {
-    await db.read();
-    const usuario = await getUsuarioPorEmail(email);
-    for (const dado in novosDados) {
-        usuario[dado] = novosDados[dado];
+import UsuarioNaoEncontrado from "../errors/UsuarioNaoEncontrado.js";
+export default class UsuarioDAO {
+    constructor(db) {
+        this.db = db;
     }
-    await db.write();
 
-}
+    async encontrarTodosUsuarios() {
+        await this.db.read();
 
-export async function deletarUsuario(email) {
-    await db.read();
-    const existe = await buscaUsuarioLocal(email);
+        return this.db.data.usuarios;
+    }
 
-    if(!existe) throw new Error('Usuário não encontrado!');
+    async encontraUsuarioPorEmail(email) {
+        await this.db.read();
 
-    db.data.usuarios = db.data.usuarios.filter(el => el.email !== email);
-    await db.write()
+        return this.db.data.usuarios.find(u => u.email === email);
+    }
+
+    async criaUsuario(usuario) {
+        await this.db.read();
+
+        this.db.data.usuarios.push(usuario);
+
+        await this.db.write();
+    }
+
+    async editaUsuario(email, novosDados) {
+        await this.db.read();
+
+        const usuario = await this.encontraUsuarioPorEmail(email);
+        if(!usuario) throw new UsuarioNaoEncontrado();
+
+        for(const dado in novosDados) {
+            usuario[dado] = novosDados[dado];
+        }
+
+        await this.db.write();
+    }
+
+    async deletarUsuario(email) {
+        await this.db.read();
+
+        const existe = db.data.usuarios.find(u => u.email === email);
+        if(!exite) throw new UsuarioNaoEncontrado();
+
+        this.db.data.usuarios = this.db.data.usuarios.filter(u => u.email !== email);
+
+        await this.db.write();
+    }
 }

@@ -1,9 +1,10 @@
 import validator from 'validator';
-import erros from './erros.js';
+import EmailVazio from '../../errors/EmailVazio.js';
+import EmailInvalido from '../../errors/EmailInvalido.js'
 export default function validaEmail(email) {
     if(!email) {
-        throw new Error(erros.emailVazio);
+        throw new EmailVazio();
     } else if(!validator.isEmail(email)) {
-        throw new Error(erros.emailInvalido);
+        throw new EmailInvalido();
     }
 }
