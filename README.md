@@ -6,6 +6,6 @@
 - [x] Acrescentar Hashs a senhas
 - [x] Banco de dados simples com `lowdb`
 - [x] Implementar padrão de projeto MVC
-- [ ] Implementar JWT ◀
-- [ ] Implementar API keys para requisições na API
+- [x] Implementar JWT
+- [ ] Implementar MongoDB ◀
 - [ ] Perguntar chat (gpt ou deep): o que são websockets?

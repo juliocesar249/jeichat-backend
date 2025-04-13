@@ -1,5 +1,6 @@
 import {Router} from 'express';
 import {usuarios, cadastro, login} from '../controllers/userController.js';
+import usuarioLogado from '../middlewares/usuarioLogado.js';
 
 const router = Router();
 
@@ -13,6 +14,6 @@ router.get('/usuarios', usuarios);
 router.post('/usuarios/cadastrar', cadastro);
 
 // Loga usuário
-router.post('/usuarios/login', login);
+router.post('/usuarios/login', usuarioLogado, login);
 
 export default router;

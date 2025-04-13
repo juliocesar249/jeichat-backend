@@ -21,9 +21,9 @@ async function login(req, res) {
 
     const {email, senha} = req.body;
     
-    await authService.logaUsuario(email, senha);
+    const autenticacao = await authService.logaUsuario(email, senha);
 
-    res.json({codigo: 1, mensagem: "Logado com sucesso!"});
+    res.json({mensagem: "Logado com sucesso!", token: autenticacao.token, nome: autenticacao.nome, email: autenticacao.email});
     return;
 }
 
