@@ -2,17 +2,17 @@
 
 - [ ] Servidor em NodeJS \+ Express \+ MongoDB \+ PostgreSQL  
 - [ ] **Rota de cadastro**  
-  - [ ] Captura os dados  
-  - [ ] Valida os dados  
-  - [ ] Hash da senha  
+  - [x] Captura os dados  
+  - [x] Valida os dados  
+  - [x] Hash da senha  
   - [ ] Salva no banco de dados com PostgreSQL  
-  - [ ] Envia uma resposta em sucesso ou falha  
+  - [x] Envia uma resposta em sucesso ou falha
 - [ ] **Rota de login**  
-  - [ ] Recebe e-mail e senha  
-  - [ ] Valida os dados  
+  - [x] Recebe e-mail e senha  
+  - [x] Valida os dados  
   - [ ] Procura e loga o usuário  
   - [ ] Cria o cookie (dados do usuário e JWT)  
-  - [ ] Envia resposta de sucesso \+ cookie ou falha  
+  - [x] Envia resposta de sucesso \+ cookie ou falha  
 - [ ] **Rota do chat**  
   - [ ] Conexão com WebSocket  
   - [ ] Validação do token  
