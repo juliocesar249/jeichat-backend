@@ -14,11 +14,11 @@
   - [ ] Cria o cookie (dados do usuário e JWT)  
   - [x] Envia resposta de sucesso \+ cookie ou falha
 - [ ] **Rota do chat**  
-  - [ ] Conexão com WebSocket  
+  - [x] Conexão com WebSocket  
   - [ ] Validação do token  
-  - [ ] Recebimento da mensagem  
+  - [x] Recebimento da mensagem  
   - [ ] Envio de resposta para confirmar o envio da mensagem  
   - [ ] Salva mensagem no banco de dado com MongoDB  
   - [ ] canal \+ email \+ texto \+ data e hora  
-  - [ ] Envio da mensagem para o chat global
+  - [x] Envio da mensagem para o chat global
   
