@@ -1,7 +1,7 @@
 import { validaCadastro } from "../helpers/validacao/index.js";
-import Usuario from "../models/Usuario.js";
 import {geraHash} from '../helpers/hashHelper.js';
 import UsuarioExiste from "../errors/UsuarioExiste.js";
+import formataData from "../helpers/formataData.js";
 
 export default class CadastroService {
     constructor(usuarioDAO) {
@@ -11,13 +11,13 @@ export default class CadastroService {
     async cadastraUsuario(nome, data, email, senha) {
         validaCadastro(nome, email, senha, data);
 
-        const existe = await this.usuarioDAO.encontraUsuarioPorEmail(email);
+        const existe = await this.usuarioDAO.encontraUsuarioPorEmail(email)[0];
 
         if(existe) throw new UsuarioExiste();
 
         const senhaHash = await geraHash(senha);
-        const novoUsuario = new Usuario(nome, email, senhaHash, data);
+        const novoUsuario = {nome, data: formataData(data), email, senhaHash};
 
-        await this.usuarioDAO.criaUsuario(novoUsuario.toJSON());
+        await this.usuarioDAO.criaUsuario(novoUsuario);
     }
 }

@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: postgres:15
+    ports:
+      - '5433:5432'
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=senhafortedeexemplo
+      - POSTGRES_DB=jeichat_usuarios
+    volumes:
+      - jeichat_data:/var/lib/postgresql/data
+volumes:
+  jeichat_data:
