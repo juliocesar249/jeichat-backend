@@ -1,17 +1,18 @@
-import UsuarioNaoEncontrado from "../errors/UsuarioNaoEncontrado.js";
+import UsuarioNaoEncontrado from "../errors/database/UsuarioNaoEncontrado.js";
 export default class UsuarioDAO {
     constructor(pool) {
         this.pool = pool;
     }
 
     async encontrarTodosUsuarios() {
-        const usuarios = await this.pool.query('SELECT * FROM Usuarios');
+        const usuarios = await this.pool.query('SELECT * FROM usuarios');
 
         return usuarios.rows;
     }
 
     async encontraUsuarioPorEmail(email) {
-        const usuario = await this.pool.query(`SELECT * FROM Usuarios WHERE email = '${email}'`);
+        const valor = [email];
+        const usuario = await this.pool.query("SELECT * FROM usuarios WHERE email = $1", valor);
 
         return usuario.rows;
     }
@@ -25,6 +26,12 @@ export default class UsuarioDAO {
         this.pool.query(querry, values);
     }
 
+    /**
+     * 
+     * @param {string} email 
+     * @param {object} novosDados 
+     * @returns nome e email do usuário alterado.
+     */
     async editaUsuario(email, novosDados) {
 
         const usuario = (await this.encontraUsuarioPorEmail(email))[0];
@@ -40,20 +47,20 @@ export default class UsuarioDAO {
         for(const campo in novosDados) {
             if(camposPermitidos.includes(campo) && novosDados[campo] !== usuario[campo]) {
                 atualizacao.valores.push(novosDados[campo]);
-                atualizacao.campos.push(`${campo} = $${atualizacao.valores.length + 1}`);
+                atualizacao.campos.push(`${campo} = $${atualizacao.valores.length}`);
             }
             indice++;
         }
-        atualizacao.valores.push(usuario.email)
+        atualizacao.valores.push(usuario.email);
         return await this.pool.query(`
-            UPDATE Usuarios SET ${atualizacao.campos.join(', ')} WHERE email = ${atualizacao.valores.length}
+            UPDATE Usuarios SET ${atualizacao.campos.join(', ')} WHERE email = $${atualizacao.valores.length}
             RETURNING nome, email;
         `, atualizacao.valores);
     }
 
     async deletarUsuario(email) {
         return await this.pool.query(`
-            DELETE FROM Usuarios WHERE email = '${email}';    
-        `)
+            DELETE FROM Usuarios WHERE email = $1';    
+        `, [email])
     }
 }
