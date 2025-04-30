@@ -1,13 +1,32 @@
 services:
   postgres:
     image: postgres:15
+    container_name: jeichat-usuarios
     ports:
       - '5433:5432'
     environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=senhafortedeexemplo
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=jeichat_usuarios
     volumes:
       - jeichat_data:/var/lib/postgresql/data
+      - ./src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+  
+  mongodb:
+    image: mongo:8.0.8
+    container_name: jeichat-mensagens
+    ports:
+      - '27018:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=jeichat
+      - MONGO_APP_USER=${MONGO_APP_USER}
+      - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
+    volumes:
+      - jeichat_mensagens_data:/data/db
+      - ./src/config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+
 volumes:
   jeichat_data:
+  jeichat_mensagens_data:

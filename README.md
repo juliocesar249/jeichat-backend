@@ -18,7 +18,7 @@
   - [ ] Validação do token  
   - [x] Recebimento da mensagem  
   - [ ] Envio de resposta para confirmar o envio da mensagem  
-  - [ ] Salva mensagem no banco de dado com MongoDB  
-  - [ ] canal \+ email \+ texto \+ data e hora  
+  - [x] Salva mensagem no banco de dado com MongoDB  
+  - [x] canal \+ email \+ texto \+ data e hora  
   - [x] Envio da mensagem para o chat global
   
