@@ -1,8 +1,9 @@
-import jwt from 'jsonwebtoken';
 import fs from 'fs';
+import jwt from 'jsonwebtoken';
 import path from 'path';
-import UsuarioLogado from '../errors/UsuarioLogado.js';
 import ErroBase from '../errors/ErroBase.js';
+import UsuarioLogado from '../errors/validacao/UsuarioLogado.js';
+
 export default function usuarioLogado(req, res, next) {
     const publicKey = fs.readFileSync(path.join(path.resolve('keys'), 'public.pem'), 'utf-8');
     const autorizacao = req.headers.authorization;

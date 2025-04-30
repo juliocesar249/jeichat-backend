@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
 import fs from 'fs';
+import jwt from 'jsonwebtoken';
 import path from 'path';
 export default function verificaToken(req, res, next) {
     const publicKey = fs.readFileSync(path.join(path.resolve('keys'), 'public.pem'), 'utf-8');

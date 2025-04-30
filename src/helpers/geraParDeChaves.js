@@ -1,5 +1,5 @@
-import {generateKeyPairSync} from 'crypto';
 import fs from 'fs';
+import {generateKeyPairSync} from 'crypto';
 
 function geraParDeChaves() {
     const {privateKey, publicKey} = generateKeyPairSync('rsa', {

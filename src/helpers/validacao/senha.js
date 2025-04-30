@@ -1,6 +1,6 @@
 import validator from 'validator';
-import SenhaVazia from '../../errors/SenhaVazia.js';
-import SenhaInvalida from '../../errors/SenhaInvalida.js';
+import SenhaVazia from '../../errors/validacao/SenhaVazia.js';
+import SenhaInvalida from '../../errors/validacao/SenhaInvalida.js';
 
 export default function validaSenha(senha, fromLogin=false) {
     if (!senha) {

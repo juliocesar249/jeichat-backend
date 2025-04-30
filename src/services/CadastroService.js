@@ -1,7 +1,7 @@
-import { validaCadastro } from "../helpers/validacao/index.js";
 import {geraHash} from '../helpers/hashHelper.js';
-import UsuarioExiste from "../errors/UsuarioExiste.js";
 import formataData from "../helpers/formataData.js";
+import UsuarioExiste from "../errors/validacao/UsuarioExiste.js";
+import { validaCadastro } from "../helpers/validacao/index.js";
 
 export default class CadastroService {
     constructor(usuarioDAO) {

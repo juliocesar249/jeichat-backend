@@ -1,6 +1,6 @@
 import validator from 'validator';
-import DataVazia from '../../errors/DataVazia.js';
-import DataInvalida from '../../errors/DataInvalida.js';
+import DataVazia from '../../errors/validacao/DataVazia.js';
+import DataInvalida from '../../errors/validacao/DataInvalida.js';
 
 export default function validaData(data) {
     if(!data) {

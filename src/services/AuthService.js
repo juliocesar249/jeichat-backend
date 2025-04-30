@@ -1,8 +1,8 @@
+import codificaJWT from '../helpers/codificaJWT.js';
+import SenhaIncorreta from '../errors/validacao/SenhaIncorreta.js';
 import { validaLogin } from '../helpers/validacao/login.js';
 import autenticaUsuario from '../helpers/autenticaUsuario.js';
-import UsuarioNaoEncontrado from '../errors/UsuarioNaoEncontrado.js';
-import SenhaIncorreta from '../errors/SenhaIncorreta.js';
-import codificaJWT from '../helpers/codificaJWT.js';
+import UsuarioNaoEncontrado from '../errors/database/UsuarioNaoEncontrado.js';
 export default class AuthService {
     constructor(usuarioDAO, publicKey) {
         this.usuarioDAO = usuarioDAO;
