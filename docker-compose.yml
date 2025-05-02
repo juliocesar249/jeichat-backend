@@ -15,8 +15,10 @@ services:
       - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
       - DOCKER=true
     depends_on:
-      - postgres
-      - mongodb
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
     networks:
       - jeichat-net
   postgres:
