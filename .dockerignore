@@ -3,3 +3,5 @@ node_modules/
 .env
 src/keys/
 index.html
+init.sql
+mongo-init.js

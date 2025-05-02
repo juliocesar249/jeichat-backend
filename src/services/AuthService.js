@@ -12,7 +12,8 @@ export default class AuthService {
     async logaUsuario(email, senha) {
         validaLogin(email, senha);
         
-        const usuario = await this.usuarioDAO.encontraUsuarioPorEmail(email);
+        const usuario = (await this.usuarioDAO.encontraUsuarioPorEmail(email))[0];
+        console.log(usuario)
 
         if(!usuario) throw new UsuarioNaoEncontrado();
 

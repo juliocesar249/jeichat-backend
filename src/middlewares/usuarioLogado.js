@@ -5,17 +5,16 @@ import ErroBase from '../errors/ErroBase.js';
 import UsuarioLogado from '../errors/validacao/UsuarioLogado.js';
 
 export default function usuarioLogado(req, res, next) {
-    const publicKey = fs.readFileSync(path.join(path.resolve('keys'), 'public.pem'), 'utf-8');
+    const publicKey = fs.readFileSync(path.resolve('./src', "keys", 'public.pem'), 'utf-8');
     const autorizacao = req.headers.authorization;
-    if(!autorizacao) return next();
+    if(!autorizacao) {
+        next();
+        return;
+    };
     try {
         jwt.verify(autorizacao, publicKey, {algorithms: ['RS256']});
         throw new UsuarioLogado();
     } catch(err) {
-        console.log('-----------------------------------------------')
-        console.log()
-        console.log()
-        console.log()
         if(err.name === "TokenExpiredError") {
             console.log(err);
             next();
