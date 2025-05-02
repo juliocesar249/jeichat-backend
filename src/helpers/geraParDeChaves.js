@@ -13,9 +13,9 @@ function geraParDeChaves() {
             format: 'pem'
         }
     });
-    
-    fs.writeFileSync('./keys/private.pem', privateKey);
-    fs.writeFileSync('./keys/public.pem', publicKey);
+    fs.mkdirSync('./src/keys');
+    fs.writeFileSync('./src/keys/private.pem', privateKey);
+    fs.writeFileSync('./src/keys/public.pem', publicKey);
 }
 
 export default geraParDeChaves;

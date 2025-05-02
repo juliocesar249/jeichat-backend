@@ -1,4 +1,24 @@
 services:
+  jeichat:
+    build: .
+    image: jeichat:1.0.0
+    container_name: jeichat-servidor
+    ports:
+      - '3000:3000'
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB_NAME=${POSTGRES_DB_NAME}
+      - POSTGRES_APP_USER=${POSTGRES_APP_USER}
+      - POSTGRES_APP_PASSWORD=${POSTGRES_APP_PASSWORD}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - MONGO_APP_USER=${MONGO_APP_USER}
+      - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
+      - DOCKER=true
+    depends_on:
+      - postgres
+      - mongodb
+    networks:
+      - jeichat-net
   postgres:
     image: postgres:15
     container_name: jeichat-usuarios
@@ -8,9 +28,16 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=jeichat_usuarios
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - jeichat_data:/var/lib/postgresql/data
       - ./src/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - jeichat-net
   
   mongodb:
     image: mongo:8.0.8
@@ -23,10 +50,21 @@ services:
       - MONGO_INITDB_DATABASE=jeichat
       - MONGO_APP_USER=${MONGO_APP_USER}
       - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.runCommand(\"ping\").ok'"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - jeichat_mensagens_data:/data/db
       - ./src/config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
-
+    networks:
+      - jeichat-net
+    
 volumes:
   jeichat_data:
   jeichat_mensagens_data:
+
+networks:
+  jeichat-net:
+    driver: bridge

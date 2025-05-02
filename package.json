@@ -4,13 +4,13 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
+    "start": "node ./src/server.js",
     "server": "nodemon ./src/server.js"
   },
-  "author": "",
+  "author": "Júlio César",
   "license": "ISC",
   "description": "",
-  "devDependencies": {
+  "dependencies": {
     "bcrypt": "^5.1.1",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",

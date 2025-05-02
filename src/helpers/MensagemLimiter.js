@@ -43,7 +43,7 @@ export default class MensagemLimiter {
         para enviar mensagens e retorna.
     */
     usuarioPodeMandar(idUsuario) {
-        const permissao = true;
+        let permissao = true;
         let usuario = {...this.usuarios.get(idUsuario)}; // evita bugs de referência.
 
         this.#verificaLimite(usuario);
