@@ -43,12 +43,13 @@ export default class MensagemLimiter {
         para enviar mensagens e retorna.
     */
     usuarioPodeMandar(idUsuario) {
-        let permissao = true;
-        let usuario = {...this.usuarios.get(idUsuario)}; // evita bugs de referência.
-
+        const usuario = {...this.usuarios.get(idUsuario)}; // evita bugs de referência.
+        let permissao = undefined;
+        let usuarioTemToken = undefined;
+        
         this.#verificaLimite(usuario);
-
-        if(usuario.tokens > 0) {
+        usuarioTemToken = usuario.modoSpam === "SPAM" ? usuario.tokens > 1 : usuario.tokens > 0;
+        if(usuarioTemToken) {
             usuario.tokens -= usuario.custoPorMensagem;
             permissao = true;
         } else {
@@ -76,7 +77,6 @@ export default class MensagemLimiter {
         if(tokensParaAdicionar > 0) this.#regeneraTokens(usuario, tokensParaAdicionar, agora);
         
         this.#atualizaSpam(usuario, tempoPassado);
-        this.#regeneraTokens(usuario, tempoPassado, agora);
     };
 
 
@@ -97,7 +97,7 @@ export default class MensagemLimiter {
     */
     #atualizaSpam(usuario, tempoPassado) {
         const PONTOS_LIMITE = 3;
-        const INTERVALO_SEGURO = 1999;
+        const INTERVALO_SEGURO = 2000;
 
         if(tempoPassado < INTERVALO_SEGURO && usuario.pontosDeSpam < PONTOS_LIMITE) {
             usuario.pontosDeSpam += 1
