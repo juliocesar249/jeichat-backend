@@ -1,8 +1,8 @@
 import { createClient } from "redis";
-import { REDIS_PASSWORD } from "../config/config.js";
+import { DOCKER, REDIS_PASSWORD } from "../config/config.js";
 
 const cliente = createClient({
-    url: 'redis://localhost:6379',
+    url: DOCKER ? 'redis://redis:6379' : 'redis://localhost:6379',
     username: 'default',
     password: REDIS_PASSWORD,
     socket: {
