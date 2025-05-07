@@ -13,6 +13,7 @@ services:
       - MONGO_DB_NAME=${MONGO_DB_NAME}
       - MONGO_APP_USER=${MONGO_APP_USER}
       - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
       - DOCKER=true
     depends_on:
       postgres:
