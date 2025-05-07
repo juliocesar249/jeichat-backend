@@ -20,4 +20,4 @@ app.use(errorHandler);
 
 iniciaWebSocket(servidor);
 
-servidor.listen(PORT, () => console.log(`Servidor aberto em http://localhost:${PORT}`));
+servidor.listen(PORT, () => console.log(`Servidor aberto em http://localhost:${PORT}`.cyan));

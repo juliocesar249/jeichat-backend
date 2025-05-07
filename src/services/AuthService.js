@@ -13,7 +13,6 @@ export default class AuthService {
         validaLogin(email, senha);
         
         const usuario = (await this.usuarioDAO.encontraUsuarioPorEmail(email))[0];
-        console.log(usuario)
 
         if(!usuario) throw new UsuarioNaoEncontrado();
 
@@ -22,7 +21,7 @@ export default class AuthService {
     }
     
     geraJWT(nome, email) {
-        const payload = {nome, email}
+        const payload = {nome, email};
         const jwt = codificaJWT(payload);
         return jwt;
     }

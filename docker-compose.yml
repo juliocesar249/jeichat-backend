@@ -19,11 +19,14 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - jeichat-net
   postgres:
-    image: postgres:15
+    image: postgres:17.4-alpine3.21
     container_name: jeichat-usuarios
+    restart: unless-stopped
     ports:
       - '5433:5432'
     environment:
@@ -42,8 +45,9 @@ services:
       - jeichat-net
   
   mongodb:
-    image: mongo:8.0.8
+    image: mongo:8.0.9
     container_name: jeichat-mensagens
+    restart: unless-stopped
     ports:
       - '27018:27017'
     environment:
@@ -62,10 +66,35 @@ services:
       - ./src/config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
     networks:
       - jeichat-net
-    
+  
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    container_name: jeichat-cache
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning --requirepass ${REDIS_PASSWORD} --maxmemory 32mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - jeichat_cache_redis_data:/data
+    networks:
+      - jeichat-net
+    deploy:
+      resources:
+        limits:
+          memory: 32mb
+          cpus: '0.5'
+
+
 volumes:
   jeichat_data:
   jeichat_mensagens_data:
+  jeichat_cache_redis_data:
 
 networks:
   jeichat-net:

@@ -10,7 +10,7 @@
 - [ ] **Rota de login**  
   - [x] Recebe e-mail e senha  
   - [x] Valida os dados  
-  - [ ] Procura e loga o usuário  
+  - [x] Procura e loga o usuário  
   - [ ] Cria o cookie (dados do usuário e JWT)  
   - [x] Envia resposta de sucesso \+ cookie ou falha
 - [ ] **Rota do chat**  

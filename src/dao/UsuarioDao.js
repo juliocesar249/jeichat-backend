@@ -5,7 +5,7 @@ export default class UsuarioDAO {
     }
 
     async encontrarTodosUsuarios() {
-        const usuarios = await this.pool.query('SELECT * FROM usuarios');
+        const usuarios = await this.pool.query('SELECT id, nome, email FROM usuarios');
 
         return usuarios.rows;
     }
