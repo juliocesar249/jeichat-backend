@@ -3,7 +3,6 @@ import { DOCKER, REDIS_PASSWORD } from "../config/config.js";
 
 const cliente = createClient({
     url: DOCKER ? 'redis://redis:6379' : 'redis://localhost:6379',
-    username: 'default',
     password: REDIS_PASSWORD,
     socket: {
         /*
