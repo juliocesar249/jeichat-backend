@@ -25,7 +25,7 @@ const cliente = createClient({
 });
 
 cliente.on('ready', () => {
-    console.log('✅ Conexão estabelecida com o Redis'.green);
+    console.log('✓ Conexão estabelecida com o Redis'.green);
 });
 
 cliente.on('error', err => {

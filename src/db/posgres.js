@@ -27,10 +27,10 @@ async function conexaoComTentativas(tentativa = 1) {
         const cliente = await pool.connect();
         await cliente.query('SELECT 1');
         cliente.release();
-        console.log('✅ Conexão com PostgreSQL estabelecida!'.green);
+        console.log('✓ Conexão com PostgreSQL estabelecida!'.green);
         return pool;
     } catch (err) {
-        console.error(`❌ Tentativa ${tentativa} de conexão ao PostgreSQL falhou.`.red);
+        console.error(`✕ Tentativa ${tentativa} de conexão ao PostgreSQL falhou.`.red);
         console.log(err);
         console.error(`Tentando conecatar ao PostgreSQL novamente em ${DELAY_RECONEXAO / 1000}s...`.yellow);
         await new Promise(resolve => setTimeout(resolve, DELAY_RECONEXAO));
