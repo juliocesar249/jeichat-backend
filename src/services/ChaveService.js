@@ -1,5 +1,6 @@
-import {randomBytes} from 'crypto';
+import {randomBytes, publicEncrypt, constants} from 'crypto';
 export default class ChaveService {
+    #cache;
     /**
      * 
      * @param {number} horas Intervalo de tempo, `em horas`, para a gerar a próxima chave.
@@ -12,7 +13,7 @@ export default class ChaveService {
         }
         this.INTERVALO_DE_ROTACAO = horas * 60 * 60 * 1000;
         this.CACHE_TTL = tempoPermanencia * 60 * 60;
-        this.cache = cacheDAO;
+        this.#cache = cacheDAO;
     }
 
     static geraChaveSimetrica() {
@@ -25,7 +26,7 @@ export default class ChaveService {
         console.log('Inicializando chaves de criptografia...'.yellow);
         const chave = ChaveService.geraChaveSimetrica();
         process.env.CHAVE_JWT = chave;
-        await this.cache.salvaChave(chave, 'jwt');
+        await this.#cache.salvaChave(chave, 'jwt');
         console.log("✓ Chave de criptgorafia JWT salva.".green);
 
         await this.rotacionaChave();
@@ -40,7 +41,8 @@ export default class ChaveService {
         try {
             console.log('Rotacionando chave de criptografia das mensagens...'.yellow);
             const novaChave = ChaveService.geraChaveSimetrica();
-            await this.cache.salvaChave(novaChave, "mensagem", this.CACHE_TTL);
+            await this.#cache.salvaChave(novaChave, "mensagem", this.CACHE_TTL);
+            process.env.CHAVE_MENSAGENS = novaChave;
             this.agendaProximaRotacao();
             console.log("✓ Rotaçao concluída.". green);
         } catch(err) {
@@ -58,4 +60,11 @@ export default class ChaveService {
         setTimeout(async () => await this.rotacionaChave(), tempoDeEspera);
     }
 
+    criptografaChave(chavePublica) {
+        return publicEncrypt({
+            key: chavePublica,
+            padding: constants.RSA_PKCS1_OAEP_PADDING,
+            oaepHash: 'sha256'
+        },Buffer.from(process.env.CHAVE_MENSAGENS))
+    }
 }

@@ -3,6 +3,7 @@ import ErroBase from '../errors/ErroBase.js';
 import UsuarioLogado from '../errors/validacao/UsuarioLogado.js';
 
 export default function usuarioLogado(req, res, next) {
+    console.log(req.cookies)
     const autorizacao = req.headers.authorization;
     if(!autorizacao) {
         next();

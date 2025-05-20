@@ -1,8 +1,7 @@
-import { cadastroService, authService } from '../config/dependencias.js';
+import { usuarioService } from '../config/dependencias.js';
 
 async function usuarios(req, res) {
-    
-    res.json(await cadastroService.usuarioDAO.encontrarTodosUsuarios());
+    // res.json(await );
     return;
 }
 
@@ -11,7 +10,7 @@ async function cadastro(req, res) {
     const dados = req.body;
     const { nome, data, email, senha } = dados;
 
-    await cadastroService.cadastraUsuario(nome, data, email, senha);
+    await usuarioService.cadastraUsuario(nome, data, email, senha);
     
     res.json({'codigo': 1, 'mensagem': 'Usuário adicionado com sucesso!'});
     return;
@@ -20,10 +19,16 @@ async function cadastro(req, res) {
 async function login(req, res) {
 
     const {email, senha} = req.body;
-    
-    const autenticacao = await authService.logaUsuario(email, senha);
 
-    res.json({mensagem: "Logado com sucesso!", token: autenticacao.token, nome: autenticacao.nome, email: autenticacao.email});
+    const autenticacao = await usuarioService.logaUsuario(email, senha);
+
+    res.cookie('auth_token', autenticacao.token, {
+        maxAge: 3600000,
+        httpOnly: true, 
+        secure: true,
+        sameSite: 'none'
+    });
+    res.json({'codigo': 1, 'mensagem': 'Logado com sucesso!', email: autenticacao.email});
     return;
 }
 

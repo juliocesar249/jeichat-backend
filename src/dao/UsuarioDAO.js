@@ -13,7 +13,6 @@ export default class UsuarioDAO {
     async encontraUsuarioPorEmail(email) {
         const valor = [email];
         const usuario = await this.pool.query("SELECT * FROM usuarios WHERE email = $1", valor);
-
         return usuario.rows;
     }
 
@@ -62,5 +61,21 @@ export default class UsuarioDAO {
         return await this.pool.query(`
             DELETE FROM Usuarios WHERE email = $1';    
         `, [email])
+    }
+
+    async salvaChavePublica(chave, email) {
+        const idUsuario = (await this.encontraUsuarioPorEmail(email))[0].id;
+        const query = `INSERT INTO chaves_publicas(chave, id_usuario) VALUES ($1, $2) ON CONFLICT (id_usuario) DO UPDATE SET chave = EXCLUDED.chave`;
+        const values = [chave, idUsuario];
+        await this.pool.query(query, values);
+    }
+
+    async procuraChavePublica(email) {
+        const usuario = (await this.encontraUsuarioPorEmail(email))[0];
+        if(!usuario) throw new UsuarioNaoEncontrado();
+        const query = `SELECT chave FROM chaves_publicas WHERE id_usuario = $1`;
+        const values = [usuario.id];
+        const chave = await this.pool.query(query, values);
+        return chave.rows;
     }
 }

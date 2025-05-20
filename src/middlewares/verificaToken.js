@@ -1,10 +1,11 @@
 import jwt from 'jsonwebtoken';
-export default function verificaToken(req, res, next) {
-    const autorizacao = req.headers.authorization;
-    if(jwt.verify(autorizacao, process.env.CHAVE_JWT, {algorithms: ['HS256']})) {
-        res.json({mensagem: 'Usuário já está logado!'});
-        return;
-    } else {
-        next();
-    };
+import TokenInvalido from '../errors/TokenInvalido.js'
+export default function verificaToken(token) {
+    try {
+        return jwt.verify(token, process.env.CHAVE_JWT, {algorithms: ['HS256']});
+    } catch(e) {
+        console.error('⚠️ Assinatura inválida!'.red);
+        console.error(e);
+        throw new TokenInvalido();
+    }
 }

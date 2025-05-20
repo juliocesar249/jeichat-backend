@@ -63,4 +63,16 @@ export default class CacheDAO {
         const chave = `criptografia:chaves:${tipo}`;
         return await this.redis.get(chave);
     }
+
+    async salvaTicket(ticket, conteudo) {
+        const chave = `ticket:${ticket}`;
+        const valor = JSON.stringify(conteudo);
+        await this.redis.set(chave, valor);
+        await this.redis.expire(chave, 5);
+    }
+
+    async procuraTicket(ticket) {
+        const chave = `ticket:${ticket}`;
+        return await this.redis.get(chave);
+    }
 }

@@ -11,6 +11,6 @@ router.get('/usuarios', usuarios);
 router.post('/usuarios/cadastrar', cadastro);
 
 // Loga usuário
-router.post('/usuarios/login', usuarioLogado, login);
+router.post('/usuarios/login', login);
 
 export default router;

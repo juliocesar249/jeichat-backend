@@ -2,7 +2,7 @@ import { config } from "dotenv";
 
 if(!process.env.DOCKER) {
     config();
-    console.log("✅ Variáveis de ambiente locais carregadas.".green)
+    console.log("✓ Variáveis de ambiente locais carregadas.".green)
 }
 
 export const {

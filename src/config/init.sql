@@ -2,10 +2,10 @@
 CREATE USER app_user WITH PASSWORD 'senhaforteaqui';
 
 -- torna ele adm do jeichat
-ALTER DATABASE jeichat_usuarios OWNER TO app_user;
+ALTER DATABASE jeichat OWNER TO app_user;
 
 -- se conecta a esse db
-\c jeichat_usuarios
+\c jeichat
 
 -- prepara para usar uuid
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -20,6 +20,12 @@ CREATE TABLE usuarios (
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE TABLE chaves_publicas (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    chave VARCHAR(600) NOT NULL,
+    id_usuario UUID UNIQUE REFERENCES usuarios(id) ON DELETE CASCADE
+);
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE usuarios TO app_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE chaves_publicas TO app_user;
