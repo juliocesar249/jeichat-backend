@@ -4,3 +4,4 @@ node_modules/
 init.sql
 mongo-init.js
 test/
+.idea
