@@ -12,7 +12,7 @@ const servidor = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-    origin: ['http://127.0.0.1:3000', 'http://localhost:3000'],
+    origin: [/* frontend address aqui */],
     credentials: true
 }));
 app.use(cookieParser());

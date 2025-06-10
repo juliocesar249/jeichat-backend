@@ -5,7 +5,7 @@ export default class ChaveService {
      * 
      * @param {number} horas Intervalo de tempo, `em horas`, para a gerar a próxima chave.
      * @param {number} tempoPermanencia Tempo, `em horas` que a chave atual ficará ativa.
-     * @param {object} cache Objeto de acesso ao cache.
+     * @param {object} cacheDAO Objeto de acesso ao cache.
      */
     constructor(horas, tempoPermanencia, cacheDAO) {
         if(!horas || horas <= 0 || !tempoPermanencia || tempoPermanencia <= 0) {
@@ -18,7 +18,7 @@ export default class ChaveService {
 
     static geraChaveSimetrica() {
         let chave = randomBytes(32);
-        chave = chave.toString('hex');
+        chave = chave.toString('base64');
         return chave;
     }
 
@@ -65,6 +65,6 @@ export default class ChaveService {
             key: chavePublica,
             padding: constants.RSA_PKCS1_OAEP_PADDING,
             oaepHash: 'sha256'
-        },Buffer.from(process.env.CHAVE_MENSAGENS))
+        }, Buffer.from(process.env.CHAVE_MENSAGENS, 'base64'));
     }
 }
