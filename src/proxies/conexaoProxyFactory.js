@@ -1,24 +1,45 @@
 import PropriedadeNaoExiste from '../errors/PropriedadeNaoExiste.js';
-import verificaAssinaturaMensagem from '../helpers/verificaAssinaturaMensagem.js'
-export default function conexaoProxyFactory(conexao, mensagem) {
+import verificaAssinaturaMensagem from '../helpers/verificaAssinaturaMensagem.js';
+import handleWsError from "../helpers/handleWsError.js";
+import verificaIntegridadeMensagem from "../helpers/verificaIntegridadeMensagem.js";
+
+export default function conexaoProxyFactory(conexao) {
     return new Proxy(conexao, {
-        user: {
-            id: undefined,
-            nonces: [],
-        },
-        get(alvo, prop, interceptador) {
-            if(!(prop in alvo)) {
-                console.log(`Propriedade ou método ${prop} não existe.`.red);
-                throw new PropriedadeNaoExiste(prop);
+        get(alvo, prop, receptor) {
+            if (prop === "on") {
+                return function interceptaMensagem(tipo, funcaoOriginal) {
+                    if (tipo === 'message') {
+                        const funcaoComVerificacao = (mensagemString) => {
+                            try {
+                                const mensagemObj = JSON.parse(mensagemString);
+
+                                const { mensagem, assinatura, chavePublicaDeAssinatura } = mensagemObj;
+
+                                if (!mensagem.dados || !assinatura || !chavePublicaDeAssinatura || !mensagem.authTag) {
+                                    return funcaoOriginal(mensagemString);
+                                }
+
+                                verificaAssinaturaMensagem(mensagem, assinatura, chavePublicaDeAssinatura);
+                                verificaIntegridadeMensagem(mensagem.dados, mensagem.authTag, process.env.CHAVE_MENSAGENS);
+
+                                funcaoOriginal(mensagemString);
+                            } catch (err) {
+                                handleWsError(alvo, err);
+                            }
+                        };
+
+                        alvo.on(tipo, funcaoComVerificacao);
+                    } else {
+                        alvo.on(tipo, funcaoOriginal);
+                    }
+                }
             }
 
-            try {
-                const res = verificaAssinaturaMensagem(mensagem);
-                interceptador.user.nonces.push(res.nonce);
-            } catch(err) {
-                console.error('⚠️ Assinatura da mensagem inválida.'.red, err);
-                conexao.send(JSON.stringify({evento: 'alerta', mensagem: 'Criptografia da mensagem comprometida. Faça login novamente.'}));
+            if (!(prop in alvo)) {
+                console.error(`✕Propriedade ou método ${prop} não existe.`.red);
+                throw new PropriedadeNaoExiste(prop);
             }
+            return Reflect.get(alvo, prop, receptor);
         }
-    })
+    });
 }

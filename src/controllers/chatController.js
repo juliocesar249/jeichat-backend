@@ -8,7 +8,7 @@ async function chat(ws, req, dados) {
     await usuarioService.salvaChavePublica(chavePublica, dados.email);
     const chaveCriptografa = chaveService.criptografaChave(chavePublica).toString('base64');
     console.log('Nova conexão com o servidor estabelecida.');
-    chatService.configuraConexao(ws);
+    await chatService.configuraConexao(ws);
     ws.send(JSON.stringify({evento: 'config', message: 'Chave criptográfica', chave: chaveCriptografa}));
 }
 

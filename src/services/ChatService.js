@@ -1,17 +1,26 @@
+import handleWsError from '../helpers/handleWsError.js';
 import {v4 as uuidv4} from 'uuid';
 import MensagemLimiter from './MensagemLimiter.js';
-import distruiMensagens from '../helpers/distribuiMensagens.js';
-import LimiteDeConexoesAtingido from '../errors/chat/LimiteDeConexoesAtingido.js'
+import distribuiMensagens from '../helpers/distribuiMensagens.js';
+import conexaoProxyFactory from '../proxies/conexaoProxyFactory.js';
+import extraiDadosMensagem from "../helpers/extraiDadosMensagem.js";
+import LimiteDeMensagensAtingido from '../errors/chat/LimiteDeMensagensAtingido.js';
+import UsuarioNaoEncontrado from "../errors/database/UsuarioNaoEncontrado.js";
+
 export default class ChatService {
     #conexoes = new Map(); // privado para impedir que qualquer um tenha acesso a essas conexões.
     #limiteConexoes = 50;
     #limiter;
-    #cacheDAO
+    #cacheDAO;
     #mensagemDAO;
+    #usuarioDAO;
+    #nonceService;
 
-    constructor(mensagemDAO, cacheDAO) {
+    constructor(usuarioDAO, mensagemDAO, cacheDAO, nonceService) {
+        this.#usuarioDAO = usuarioDAO;
         this.#mensagemDAO = mensagemDAO;
         this.#cacheDAO = cacheDAO;
+        this.#nonceService = nonceService;
         this.MAX_MENSAGEM_POR_SEGUNDOS = 20;
         this.#limiter = new MensagemLimiter(this.MAX_MENSAGEM_POR_SEGUNDOS); // privado para impedir que qualquer possa mecher no limite.
     }
@@ -39,48 +48,67 @@ export default class ChatService {
         this.#limiter.deletaUsuario(uuid);
     }
 
-    configuraConexao(conexao) {
-        conexao.uuid = uuidv4(); //! REMOVER DEPOIS, SOMENTE PARA TESTES
-        conexao.on('message', async mensagemJson => {
-            // verifica se o usuário atingiu o limite de msgs/min e o alerta, caso verdadeiro
-            if(!this.#limiter.usuarioPodeMandar(conexao.uuid)) {
-                conexao.send(JSON.stringify({evento: "alerta", mensagem: "Muitas mensagens, aguarde..."}));
-                console.log(`conexao: ${conexao.uuid} atingiu limite de 20 mensagens. Aguardando o reset do limite...`.yellow);
-                return;
-            }
-            
-            let mensagem;
-            try {
-                mensagem = JSON.parse(mensagemJson);
-            } catch(err) {
-                conexao.send(JSON.stringify({evento: 'erro', mensagem: 'Objeto de mensagem não condiz com o schema.'}));
-                return;
-            }
-            await this.salvaMensagem(mensagem);
-            this.#conexoes.forEach(ws => {
-                ws.send(JSON.stringify(mensagem));
-            });
+    async configuraConexao(conexao) {
+        Object.defineProperty(conexao, 'uuid', {
+            value: uuidv4(),
+            enumerable: true,
+            writable: false,
+            configurable: false
+        });
+        const conexaoProxy = conexaoProxyFactory(conexao);
+        conexaoProxy.on('close', () => {
+            this.#deletaConexao(conexaoProxy.uuid);
+            console.log(`UUID ${conexaoProxy.uuid} desconectado`.red);
         });
 
-        conexao.on('close', () => {
-            this.#deletaConexao(conexao.uuid);
-            console.log(`UUID ${conexao.uuid} desconectado`.red);
+        conexaoProxy.on('message', async stringDeDados => {
+            try {
+                // verifica se o usuário atingiu o limite de msgs/min e o alerta, caso verdadeiro
+                if(!this.#limiter.usuarioPodeMandar(conexao.uuid)) {
+                    throw new LimiteDeMensagensAtingido();
+                }
+                
+                let objDeDados;
+                try {
+                     objDeDados = JSON.parse(stringDeDados);
+                } catch(err) {
+                    handleWsError(conexaoProxy, err);
+                    return;
+                }
+
+                const usuarioUUID = (await this.#usuarioDAO.encontraUsuarioPorEmail(objDeDados.usuario.email))[0].id;
+                if(!usuarioUUID) {
+                    conexaoProxy.close();
+                    throw new UsuarioNaoEncontrado();
+                }
+
+                await this.#nonceService.verificaEAdiciona(objDeDados.mensagem.nonce, usuarioUUID);
+                await this.salvaMensagem(objDeDados);
+                objDeDados = extraiDadosMensagem(objDeDados);
+                this.#conexoes.forEach(conexaoProxy => {
+                    conexaoProxy.send(JSON.stringify(objDeDados));
+                });
+
+            } catch (err) {
+                handleWsError(conexaoProxy, err);
+            }
         });
-        this.salvaConexoes(conexao);
-        conexao.send(JSON.stringify({evento: 'config', status: 'ready', message: 'Conexão estabelecida com texto UTF-8'}));
-        this.restauraHistorico(conexao);
+
+        this.salvaConexoes(conexaoProxy);
+        conexaoProxy.send(JSON.stringify({evento: 'config', status: 'ready', message: 'Conexão estabelecida com texto UTF-8'}));
+        await this.restauraHistorico(conexaoProxy);
     }
 
     async restauraHistorico(conexao) {
         const mensagensEmCahe = await this.#cacheDAO.recuperaHistorico();
         let mensagensDoBanco;
         if(Array.isArray(mensagensEmCahe) && mensagensEmCahe.length > 0) {    // verifica se tem alguma mensagem em cache
-            await distruiMensagens(conexao, mensagensEmCahe); // se tiver é distribuído
+            await distribuiMensagens(conexao, mensagensEmCahe); // se tiver é distribuído
             return;
         } else {
             mensagensDoBanco = await this.#mensagemDAO.buscaMensagens();
             mensagensDoBanco = mensagensDoBanco.reverse().splice(0, 20).reverse(); // invertido para pegar as 20 últimas e inverte de novo para ficar na ordem cronologia correta.
-            await distruiMensagens(conexao, mensagensDoBanco);
+            await distribuiMensagens(conexao, mensagensDoBanco);
             await Promise.all(mensagensDoBanco.map(m => this.#cacheDAO.salvaMensagem(m))); // salva essas mensansagens no cache também.
             return;
         }
@@ -90,4 +118,5 @@ export default class ChatService {
         await this.#mensagemDAO.salvaMensagem(mensagem);
         await this.#cacheDAO.salvaMensagem(mensagem);
     }
+
 }

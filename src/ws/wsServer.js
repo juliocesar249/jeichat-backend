@@ -1,6 +1,7 @@
 import { WebSocketServer } from "ws";
 import { chat } from "../controllers/chatController.js";
 import verificaTicket from "../helpers/verificaTicket.js";
+import handleWsError from "../helpers/handleWsError.js";
 
 export default function iniciaWebSocket(servidorHttp) {
     const servidor = new WebSocketServer({server: servidorHttp});
@@ -11,14 +12,13 @@ export default function iniciaWebSocket(servidorHttp) {
         try {
             const dados = await verificaTicket(ticket, req.socket.remoteAddress)
             if(url.pathname === '/chat') {
-                await chat(ws, req, dados);
+                await chat((ws), req, dados);
             } else {
                 ws.send('rota não existe!');
                 ws.close();
             }
         } catch(err) {
-            console.error(err);
-            ws.send(JSON.stringify({evento: 'erro', mensagem: 'Ticket inválido.', status: 401}));
+            handleWsError(ws, err);
             ws.close();
         }
     });

@@ -4,9 +4,15 @@ export default function criaModel(mongoose) {
             nome: {type: String, required: true},
             email: {type: String, required: true}
         },
-        texto: {type: String, required: true}
+        mensagem: {
+            dados: {type: String, required: true},
+            iv: {type: String, required: true},
+            authTag: {type: String, required: true}
+        },
+        assinatura: {type: String, required: true},
+        chavePublicaDeAssinatura: {type: String, required: true}
     }, {
-        timestamps: true,
+        timestamp: true,
         collection: 'mensagens'
     })
     

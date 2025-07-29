@@ -25,12 +25,6 @@ export default class UsuarioDAO {
         this.pool.query(querry, values);
     }
 
-    /**
-     * 
-     * @param {string} email 
-     * @param {object} novosDados 
-     * @returns nome e email do usuário alterado.
-     */
     async editaUsuario(email, novosDados) {
 
         const usuario = (await this.encontraUsuarioPorEmail(email))[0];
@@ -77,5 +71,26 @@ export default class UsuarioDAO {
         const values = [usuario.id];
         const chave = await this.pool.query(query, values);
         return chave.rows;
+    }
+
+    async salvaNonce(nonce, usuarioId) {
+        const query = `INSERT INTO nonces_usuario (nonce, id_usuario) VALUES ($1, $2)`;
+        const values = [nonce, usuarioId];
+        return await this.pool.query(query, values);
+    }
+
+    async nonceExiste(nonce, usuarioId = undefined) {
+        const dadosQuery = {values: []};
+        dadosQuery.values.push(nonce);
+        if(usuarioId){
+            dadosQuery.values.push(usuarioId);
+            dadosQuery.query = `SELECT * FROM nonces_usuario WHERE nonce = $1 AND id_usuario = $2`;
+        } else {
+            dadosQuery.query = `SELECT * FROM nonces_usuarios WHERE nonce = $1`;
+        }
+
+        const res = await this.pool.query(dadosQuery.query, [...dadosQuery.values])
+
+        return res.rows;
     }
 }

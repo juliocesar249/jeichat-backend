@@ -9,7 +9,7 @@ export default class ChaveService {
      */
     constructor(horas, tempoPermanencia, cacheDAO) {
         if(!horas || horas <= 0 || !tempoPermanencia || tempoPermanencia <= 0) {
-            throw new Error('Intervalos inválidos');
+            throw new Error('✕ Intervalos inválidos'.red);
         }
         this.INTERVALO_DE_ROTACAO = horas * 60 * 60 * 1000;
         this.CACHE_TTL = tempoPermanencia * 60 * 60;
@@ -23,7 +23,7 @@ export default class ChaveService {
     }
 
     async inicializarChaves() {
-        console.log('Inicializando chaves de criptografia...'.yellow);
+        console.log('↺ Inicializando chaves de criptografia...'.yellow);
         const chave = ChaveService.geraChaveSimetrica();
         process.env.CHAVE_JWT = chave;
         await this.#cache.salvaChave(chave, 'jwt');
@@ -39,7 +39,7 @@ export default class ChaveService {
         }
 
         try {
-            console.log('Rotacionando chave de criptografia das mensagens...'.yellow);
+            console.log('↺ Rotacionando chave de criptografia das mensagens...'.yellow);
             const novaChave = ChaveService.geraChaveSimetrica();
             await this.#cache.salvaChave(novaChave, "mensagem", this.CACHE_TTL);
             process.env.CHAVE_MENSAGENS = novaChave;
@@ -47,7 +47,7 @@ export default class ChaveService {
             console.log("✓ Rotaçao concluída.". green);
         } catch(err) {
             console.error("✕ Erro ao rotacionar chave:".red, err);
-            console.log("Tentando novamente em 60 segundos...".yellow);
+            console.log("↺ Tentando novamente em 60 segundos...".yellow);
             setTimeout(async () => await this.rotacionaChave(tentativas + 1), 60000);
         }
     }

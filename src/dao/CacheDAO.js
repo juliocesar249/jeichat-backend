@@ -75,4 +75,17 @@ export default class CacheDAO {
         const chave = `ticket:${ticket}`;
         return await this.redis.get(chave);
     }
+
+    async salvaNonce(nonce, usuarioId) {
+        const chave = `nonces:${usuarioId}`;
+        const res = await this.redis.sAdd(chave, nonce);
+        const ttl = await this.redis.ttl(chave);
+        if(ttl === -1) await this.redis.expire(chave, 12 * 60 * 60);
+        return res;
+    }
+
+    async nonceExiste(nonce, usuarioID) {
+        const chave = `nonces:${usuarioID}`;
+        return await this.redis.sIsMember(chave, nonce);
+    }
 }

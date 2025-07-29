@@ -22,3 +22,4 @@
   - [x] Salva mensagem no banco de dado com MongoDB  
   - [x] canal \+ email \+ texto \+ data e hora  
   - [x] Envio da mensagem para o chat global
+

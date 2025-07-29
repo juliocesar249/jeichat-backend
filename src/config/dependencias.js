@@ -9,6 +9,7 @@ import MensagemDAO from '../dao/MensagemDAO.js';
 import ChatService from '../services/ChatService.js';
 import ChaveService from '../services/ChaveService.js';
 import UsuarioService from "../services/UsuarioService.js";
+import NonceService from "../services/NonceService.js";
 
 await cliente.connect();
 
@@ -17,7 +18,8 @@ const cacheDAO = new CacheDAO(cliente);
 const chaveService = new ChaveService(12, 13, cacheDAO);
 const mensagemDAO = new MensagemDAO(criaModel(mongoose), cacheDAO);
 const usuarioService = new UsuarioService(usuarioDAO, cacheDAO);
-const chatService = new ChatService(mensagemDAO, cacheDAO);
+const nonceService = new NonceService(usuarioDAO, cacheDAO);
+const chatService = new ChatService(usuarioDAO, mensagemDAO, cacheDAO, nonceService);
 
 await chaveService.inicializarChaves();
 

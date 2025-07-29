@@ -21,11 +21,21 @@ CREATE TABLE usuarios (
 );
 
 CREATE TABLE chaves_publicas (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    chave VARCHAR(600) NOT NULL,
-    id_usuario UUID UNIQUE REFERENCES usuarios(id) ON DELETE CASCADE
+    id         UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    chave      VARCHAR(600) NOT NULL,
+    id_usuario UUID UNIQUE REFERENCES usuarios (id) ON DELETE CASCADE,
+    criado_em  TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE nonces_usuario (
+    id         INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nonce      TEXT NOT NULL,
+    id_usuario UUID REFERENCES usuarios (id) NOT NULL ON DELETE CASCADE,
+    criado_em  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE (nonce, id_usuario)
 );
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE usuarios TO app_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE chaves_publicas TO app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE nonces_usuario TO app_user;
