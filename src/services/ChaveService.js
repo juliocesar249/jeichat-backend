@@ -2,7 +2,7 @@ import {randomBytes, publicEncrypt, constants} from 'crypto';
 export default class ChaveService {
     #cache;
     /**
-     * 
+     *
      * @param {number} horas Intervalo de tempo, `em horas`, para a gerar a próxima chave.
      * @param {number} tempoPermanencia Tempo, `em horas` que a chave atual ficará ativa.
      * @param {object} cacheDAO Objeto de acesso ao cache.
@@ -22,8 +22,24 @@ export default class ChaveService {
         return chave;
     }
 
-    async inicializarChaves() {
+    async iniciar() {
         console.log('↺ Inicializando chaves de criptografia...'.yellow);
+        let existeChave = {jwt: {cache: (await this.#cache.procuraChaveCriptografica('jwt'))}, mensagens: {cache: (await this.#cache.procuraChaveCriptografica('mensagem'))}};
+        if(!existeChave.jwt.cache && !existeChave.mensagens.cache) {
+            await this.preparaChaveJWT();
+            await this.rotacionaChave();
+        } if(!existeChave.jwt.cache && existeChave.mensagens.cache) {
+            await this.preparaChaveJWT();
+        } else if(existeChave.jwt.cache && !existeChave.mensagens.cache) {
+            await this.rotacionaChave();
+        } else {
+            process.env.CHAVE_JWT = existeChave.jwt.cache;
+            process.env.CHAVE_MENSAGENS = existeChave.mensagens.cache;
+            await this.agendaProximaRotacao(await this.#cache.tempoDeVida('chaveMensagens'));
+        }
+    }
+
+    async prepararChaves() {
         const chave = ChaveService.geraChaveSimetrica();
         process.env.CHAVE_JWT = chave;
         await this.#cache.salvaChave(chave, 'jwt');
@@ -32,7 +48,21 @@ export default class ChaveService {
         await this.rotacionaChave();
     }
 
-    async rotacionaChave(tentativas = 0) {
+    async preparaChaveJWT() {
+        try {
+            console.log('↺ Criando chave de criptografia JWT...'.yellow);
+            const chave = ChaveService.geraChaveSimetrica();
+            process.env.CHAVE_JWT = chave;
+            await this.#cache.salvaChave(chave, 'jwt');
+            console.log('✓ Chave de criptografia JWT sava.'.green);
+        } catch(err) {
+            console.log('✕ Erro ao criar chave de criptografia JWT.'.red);
+            console.log(err);
+            throw new Error('Erro interno do servidor'.red);
+        }
+    }
+
+    async rotacionaChave(tentativas = 0, proximaRotacao = 0) {
         if(tentativas > 5) {
             console.log("✕ Falha ao gerar chave de criptografia das mensagens.".red);
             process.exit();
@@ -43,7 +73,7 @@ export default class ChaveService {
             const novaChave = ChaveService.geraChaveSimetrica();
             await this.#cache.salvaChave(novaChave, "mensagem", this.CACHE_TTL);
             process.env.CHAVE_MENSAGENS = novaChave;
-            this.agendaProximaRotacao();
+            this.agendaProximaRotacao(proximaRotacao);
             console.log("✓ Rotaçao concluída.". green);
         } catch(err) {
             console.error("✕ Erro ao rotacionar chave:".red, err);
@@ -52,12 +82,19 @@ export default class ChaveService {
         }
     }
 
-    agendaProximaRotacao() {
+    agendaProximaRotacao(proximaRotacaoAgendada = 0) {
         const agora = Date.now();
-        const proximaRotacao = agora + this.INTERVALO_DE_ROTACAO;
-        const tempoDeEspera = proximaRotacao - agora;
-        console.log(`Proxima rotação em ${this.INTERVALO_DE_ROTACAO / (60 * 60 * 1000)} horas.`.magenta);
-        setTimeout(async () => await this.rotacionaChave(), tempoDeEspera);
+        let proximaRotacao;
+
+        if(proximaRotacaoAgendada > 0) {
+            setTimeout(async () => await this.rotacionaChave(), proximaRotacaoAgendada);
+            console.log(`Proxima rotação em ${Math.round(proximaRotacaoAgendada / (60 * 60))} horas.`.magenta);
+        } else {
+            proximaRotacao = agora + this.INTERVALO_DE_ROTACAO;
+            const tempoDeEspera = proximaRotacao - agora;
+            console.log(`Proxima rotação em ${this.INTERVALO_DE_ROTACAO / (60 * 60 * 1000)} horas.`.magenta);
+            setTimeout(async () => await this.rotacionaChave(), tempoDeEspera);
+        }
     }
 
     criptografaChave(chavePublica) {

@@ -5,6 +5,7 @@ import userRoutes from './routes/userRoutes.js';
 import ticketRoute from "./routes/ticketRoute.js";
 import cookieParser from 'cookie-parser';
 import errorHandler from './middlewares/errorHandler.js';
+import {chaveService} from "./config/dependencias.js";
 import iniciaWebSocket from './ws/wsServer.js';
 import {limpezaService} from "./config/dependencias.js";
 
@@ -18,6 +19,7 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(express.json());
+await chaveService.iniciar();
 
 app.get('/', (req, res) => res.send('<h1>Servidor funcionando!</h1>'));
 app.use(ticketRoute);

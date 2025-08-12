@@ -6,6 +6,16 @@ export default class CacheDAO {
         };
     }
 
+    async tempoDeVida(chave) {
+        const chaves = {
+            autenticacao: 'autenticacao:emails',
+            mensagens: 'chat:global:mensagens',
+            chaveJWT: 'criptografia:chaves:jwt',
+            chaveMensagens: 'criptografia:chaves:mensagem'
+        }
+        return await this.redis.ttl(chaves[chave]);
+    }
+
     async salvaEmail(email) {
         const chave = 'autenticacao:emails';
         const resposta =  await this.redis.lPush(chave, email);

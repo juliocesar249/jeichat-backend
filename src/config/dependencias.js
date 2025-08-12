@@ -25,7 +25,7 @@ const usuarioService = new UsuarioService(usuarioDAO, cacheDAO);
 const nonceService = new NonceService(usuarioDAO, cacheDAO);
 const chatService = new ChatService(usuarioDAO, mensagemDAO, cacheDAO, nonceService);
 
-await chaveService.inicializarChaves();
+// await chaveService.prepararChaves();
 
 export {
     usuarioService,
