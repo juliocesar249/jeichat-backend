@@ -29,7 +29,7 @@ export default class ChaveService {
             console.log('↺ Chaves de criptografia não encontradas. Criando novas...'.yellow);
             await this.preparaChaveJWT();
             await this.rotacionaChave();
-        } if(!existeChave.jwt.cache && existeChave.mensagens.cache) {
+        } else if(!existeChave.jwt.cache && existeChave.mensagens.cache) {
             await this.preparaChaveJWT();
         } else if(existeChave.jwt.cache && !existeChave.mensagens.cache) {
             await this.rotacionaChave();
