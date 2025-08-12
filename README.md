@@ -53,6 +53,9 @@ REDIS_PASSWORD=senhaforteaqui
 
 # Flag para indicar ambiente Docker
 DOCKER=true
+
+# Porta externa do servidor
+PORT=3000
 ```
 
 ### 3. Iniciando os Serviços com Docker
