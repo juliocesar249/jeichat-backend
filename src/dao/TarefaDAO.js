@@ -22,6 +22,12 @@ export default class TarefaDAO {
         return tarefa.rows;
     }
 
+    async procuraPorTarefaNaoExecutada() {
+        const query = "SELECT * FROM tarefas_agendadas WHERE status = 'AGENDADO'";
+        const tarefa = await this.pool.query(query);
+        return tarefa.rows;
+    }
+
     async buscaPorTarefaEmExecucao() {
         const query = 'SELECT * FROM tarefas_agendadas WHERE status = "EXECUTANDO"';
         const tarefa = await this.pool.query(query);

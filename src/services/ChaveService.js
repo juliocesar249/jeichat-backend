@@ -26,6 +26,7 @@ export default class ChaveService {
         console.log('↺ Inicializando chaves de criptografia...'.yellow);
         let existeChave = {jwt: {cache: (await this.#cache.procuraChaveCriptografica('jwt'))}, mensagens: {cache: (await this.#cache.procuraChaveCriptografica('mensagem'))}};
         if(!existeChave.jwt.cache && !existeChave.mensagens.cache) {
+            console.log('↺ Chaves de criptografia não encontradas. Criando novas...'.yellow);
             await this.preparaChaveJWT();
             await this.rotacionaChave();
         } if(!existeChave.jwt.cache && existeChave.mensagens.cache) {
@@ -33,19 +34,11 @@ export default class ChaveService {
         } else if(existeChave.jwt.cache && !existeChave.mensagens.cache) {
             await this.rotacionaChave();
         } else {
+            console.log('Chaves de criptografia encontradas.'.magenta);
             process.env.CHAVE_JWT = existeChave.jwt.cache;
             process.env.CHAVE_MENSAGENS = existeChave.mensagens.cache;
             await this.agendaProximaRotacao(await this.#cache.tempoDeVida('chaveMensagens'));
         }
-    }
-
-    async prepararChaves() {
-        const chave = ChaveService.geraChaveSimetrica();
-        process.env.CHAVE_JWT = chave;
-        await this.#cache.salvaChave(chave, 'jwt');
-        console.log("✓ Chave de criptgorafia JWT salva.".green);
-
-        await this.rotacionaChave();
     }
 
     async preparaChaveJWT() {
@@ -87,7 +80,7 @@ export default class ChaveService {
         let proximaRotacao;
 
         if(proximaRotacaoAgendada > 0) {
-            setTimeout(async () => await this.rotacionaChave(), proximaRotacaoAgendada);
+            setTimeout(async () => await this.rotacionaChave(), proximaRotacaoAgendada * 1000);
             console.log(`Proxima rotação de criptografia de chaves em ${Math.round(proximaRotacaoAgendada / (60 * 60))} horas.`.magenta);
         } else {
             proximaRotacao = agora + this.INTERVALO_DE_ROTACAO;

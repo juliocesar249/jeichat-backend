@@ -11,39 +11,37 @@ export default class LimpezaService {
     }
 
     async iniciar() {
-        const existeLimpezaParaExecutar = (await this.#tarefaDAO.procuraPorProximaTarefaAgendada())[0];
+        const existeLimpezaParaExecutar = (await this.#tarefaDAO.procuraPorTarefaNaoExecutada())[0];
         if(existeLimpezaParaExecutar) {
             console.log('✓ Tarefa de limpeza encontrada.'.magenta);
             let agora = Date.now();
-            let diferenca = existeLimpezaParaExecutar?.proxima_execucao.getTime() - agora;
-
-            if(existeLimpezaParaExecutar && diferenca <= 0) {
+            let diferenca = existeLimpezaParaExecutar.proxima_execucao.getTime() - agora;
+            if(diferenca <= 0) {
                 await this.executarLimpeza(existeLimpezaParaExecutar.id);
-            } else if(existeLimpezaParaExecutar && diferenca < this.#INTERVALO) {
-                await this.agendaProximaLimpeza(diferenca, existeLimpezaParaExecutar);
-            } else {
+            } else if(diferenca < this.#INTERVALO) {
                 console.log('↺ Iniciando agendamente de limepeza existente...'.yellow);
-                await this.agendaProximaLimpeza(this.#INTERVALO);
+                await this.agendaProximaLimpeza(existeLimpezaParaExecutar.proxima_execucao, existeLimpezaParaExecutar.id);
             }
         } else {
-            await this.agendaProximaLimpeza(this.#INTERVALO);
+            await this.agendaProximaLimpeza(Date.now() + this.#INTERVALO);
         }
     }
 
-    async agendaProximaLimpeza(tempo, existeLimpezaParaExecutar) {
-        console.log('↺ Agendando próxima limpeza de mensagen...'.yellow);
+    async agendaProximaLimpeza(proximaExecucao, idLimpezaParaExecutar) {
+        console.log('↺ Agendando próxima limpeza de mensagens...'.yellow);
         let idLimpeza;
 
-        if(!existeLimpezaParaExecutar) {
-            await this.#tarefaDAO.criaNovaTarefa('LIMPEZA_MENSAGENS', Date.now() + tempo, 'AGENDADO');
+        if(!idLimpezaParaExecutar) {
+            await this.#tarefaDAO.criaNovaTarefa('LIMPEZA_MENSAGENS', proximaExecucao, 'AGENDADO');
             idLimpeza = (await this.#tarefaDAO.procuraPorProximaTarefaAgendada())[0].id;
         } else {
-            idLimpeza = existeLimpezaParaExecutar;
+            idLimpeza = idLimpezaParaExecutar;
         }
 
-        setTimeout(async () => await this.executarLimpeza(idLimpeza), tempo);
+        const tempoDeEspera = proximaExecucao - Date.now();
+        setTimeout(async () => await this.executarLimpeza(idLimpeza), tempoDeEspera);
 
-        console.log(`✓ Próxima limpeza de mensagens agendada para daqui a ${Math.round(tempo / (60 * 60 * 1000))} horas`.green);
+        console.log(`✓ Próxima limpeza de mensagens agendada para daqui a ${Math.round(tempoDeEspera / (60 * 60 * 1000))} horas.`.green);
     }
 
     async executarLimpeza(idLimpeza, tentativas = 0) {
@@ -90,9 +88,8 @@ export default class LimpezaService {
                 throw new ErroBase('Erro interno do servidor'.red);
             }
 
-            await this.agendaProximaLimpeza(new Date().getTime() + this.#INTERVALO);
-
         }
+        await this.agendaProximaLimpeza(Date.now() + this.#INTERVALO);
         await this.#tarefaDAO.atualizaStatusTarefa(idLimpeza, 'EXECUTADO');
     }
 }
