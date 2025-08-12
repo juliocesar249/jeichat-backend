@@ -54,7 +54,7 @@ export default class ChaveService {
             const chave = ChaveService.geraChaveSimetrica();
             process.env.CHAVE_JWT = chave;
             await this.#cache.salvaChave(chave, 'jwt');
-            console.log('✓ Chave de criptografia JWT sava.'.green);
+            console.log('✓ Chave de criptografia JWT salva.'.green);
         } catch(err) {
             console.log('✕ Erro ao criar chave de criptografia JWT.'.red);
             console.log(err);
@@ -69,15 +69,15 @@ export default class ChaveService {
         }
 
         try {
-            console.log('↺ Rotacionando chave de criptografia das mensagens...'.yellow);
+            console.log('↺ Rotacionando chave de criptografia de mensagens...'.yellow);
             const novaChave = ChaveService.geraChaveSimetrica();
             await this.#cache.salvaChave(novaChave, "mensagem", this.CACHE_TTL);
             process.env.CHAVE_MENSAGENS = novaChave;
             this.agendaProximaRotacao(proximaRotacao);
-            console.log("✓ Rotaçao concluída.". green);
+            console.log("✓ Rotaçao de chave de criptografia de mensagens concluída.". green);
         } catch(err) {
-            console.error("✕ Erro ao rotacionar chave:".red, err);
-            console.log("↺ Tentando novamente em 60 segundos...".yellow);
+            console.error("✕ Erro ao rotacionar chave de criptografia de mensagens:".red, err);
+            console.log("↺ Rotação de chave de criptografia novamente em 60 segundos...".yellow);
             setTimeout(async () => await this.rotacionaChave(tentativas + 1), 60000);
         }
     }
@@ -88,11 +88,11 @@ export default class ChaveService {
 
         if(proximaRotacaoAgendada > 0) {
             setTimeout(async () => await this.rotacionaChave(), proximaRotacaoAgendada);
-            console.log(`Proxima rotação em ${Math.round(proximaRotacaoAgendada / (60 * 60))} horas.`.magenta);
+            console.log(`Proxima rotação de criptografia de chaves em ${Math.round(proximaRotacaoAgendada / (60 * 60))} horas.`.magenta);
         } else {
             proximaRotacao = agora + this.INTERVALO_DE_ROTACAO;
             const tempoDeEspera = proximaRotacao - agora;
-            console.log(`Proxima rotação em ${this.INTERVALO_DE_ROTACAO / (60 * 60 * 1000)} horas.`.magenta);
+            console.log(`Proxima rotação de criptografia de chaves em em ${this.INTERVALO_DE_ROTACAO / (60 * 60 * 1000)} horas.`.magenta);
             setTimeout(async () => await this.rotacionaChave(), tempoDeEspera);
         }
     }
