@@ -37,6 +37,11 @@ export default class CacheDAO {
         return mensagens;
     }
 
+    async limpaHistoricoMensagens() {
+        const chave = 'chat:global:mensagens';
+        return await this.redis.del(chave);
+    }
+
     /**
      * 
      * @param {string} chave chave criptográfica

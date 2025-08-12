@@ -12,4 +12,8 @@ export default class MensagemDAO {
         const novaMensagem = new this.db(mensagem);
         await novaMensagem.save();
     }
+
+    async deletaMensagensAntigas() {
+        return await this.db.deleteMany({});
+    }
 }

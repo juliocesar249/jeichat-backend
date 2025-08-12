@@ -5,7 +5,6 @@ export default function verificaAssinaturaMensagem({dados, iv, nonce}, assinatur
     const verificador = crypto.createVerify('RSA-SHA256');
     const paraVerificar = JSON.stringify({dados, iv, nonce});
     chaveAssinatura = `-----BEGIN PUBLIC KEY-----\n${chaveAssinatura}\n-----END PUBLIC KEY-----`;
-    // O conteúdo da mensagem precisa ser um Buffer para a verificação
     verificador.update(Buffer.from(paraVerificar, "utf8"));
 
     const assinaturaEhValida = verificador.verify(

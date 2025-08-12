@@ -58,7 +58,7 @@ export default class ChatService {
         const conexaoProxy = conexaoProxyFactory(conexao);
         conexaoProxy.on('close', () => {
             this.#deletaConexao(conexaoProxy.uuid);
-            console.log(`UUID ${conexaoProxy.uuid} desconectado`.red);
+            console.log(`✕ UUID ${conexaoProxy.uuid} desconectado`.red);
         });
 
         conexaoProxy.on('message', async stringDeDados => {
@@ -95,7 +95,6 @@ export default class ChatService {
         });
 
         this.salvaConexoes(conexaoProxy);
-        conexaoProxy.send(JSON.stringify({evento: 'config', status: 'ready', message: 'Conexão estabelecida com texto UTF-8'}));
         await this.restauraHistorico(conexaoProxy);
     }
 

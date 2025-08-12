@@ -1,7 +1,8 @@
+import handleWsError from "../helpers/handleWsError.js";
 import PropriedadeNaoExiste from '../errors/PropriedadeNaoExiste.js';
 import verificaAssinaturaMensagem from '../helpers/verificaAssinaturaMensagem.js';
-import handleWsError from "../helpers/handleWsError.js";
 import verificaIntegridadeMensagem from "../helpers/verificaIntegridadeMensagem.js";
+import {usuarioService} from "../config/dependencias.js";
 
 export default function conexaoProxyFactory(conexao) {
     return new Proxy(conexao, {
@@ -9,13 +10,13 @@ export default function conexaoProxyFactory(conexao) {
             if (prop === "on") {
                 return function interceptaMensagem(tipo, funcaoOriginal) {
                     if (tipo === 'message') {
-                        const funcaoComVerificacao = (mensagemString) => {
+                        const funcaoComVerificacao = async (mensagemString) => {
                             try {
                                 const mensagemObj = JSON.parse(mensagemString);
 
                                 const { mensagem, assinatura, chavePublicaDeAssinatura } = mensagemObj;
 
-                                if (!mensagem.dados || !assinatura || !chavePublicaDeAssinatura || !mensagem.authTag) {
+                                if (!mensagem.dados || !assinatura || !mensagem.authTag) {
                                     return funcaoOriginal(mensagemString);
                                 }
 
@@ -36,7 +37,7 @@ export default function conexaoProxyFactory(conexao) {
             }
 
             if (!(prop in alvo)) {
-                console.error(`✕Propriedade ou método ${prop} não existe.`.red);
+                console.error(`✕ Propriedade ou método ${prop} não existe.`.red);
                 throw new PropriedadeNaoExiste(prop);
             }
             return Reflect.get(alvo, prop, receptor);

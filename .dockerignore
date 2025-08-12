@@ -5,3 +5,4 @@ init.sql
 mongo-init.js
 test/
 .idea
+GEMINI.md

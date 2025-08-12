@@ -6,6 +6,7 @@ import ticketRoute from "./routes/ticketRoute.js";
 import cookieParser from 'cookie-parser';
 import errorHandler from './middlewares/errorHandler.js';
 import iniciaWebSocket from './ws/wsServer.js';
+import {limpezaService} from "./config/dependencias.js";
 
 const app = express();
 const servidor = http.createServer(app);
@@ -24,5 +25,6 @@ app.use('/api', userRoutes);
 app.use(errorHandler);
 
 iniciaWebSocket(servidor);
+await limpezaService.iniciar();
 
 servidor.listen(PORT, () => console.log(`Servidor aberto em http://localhost:${PORT}`.cyan));

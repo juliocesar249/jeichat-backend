@@ -35,7 +35,15 @@ CREATE TABLE nonces_usuario (
     UNIQUE (nonce, id_usuario)
 );
 
+CREATE TABLE tarefas_agendadas (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    nome_tarefa VARCHAR(255) NOT NULL,
+    proxima_execucao TIMESTAMPTZ NOT NULL CHECK (proxima_execucao > CURRENT_DATE),
+    status VARCHAR(255) DEFAULT 'AGENDADO' CHECK (status = 'AGENDADO' OR status = 'EXECUTANDO' OR status = 'EXECUTADO' or STATUS = 'FALHOU')
+);
+
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE usuarios TO app_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE chaves_publicas TO app_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE nonces_usuario TO app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE tarefas_agendadas TO app_user;
