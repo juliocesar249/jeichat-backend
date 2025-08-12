@@ -36,7 +36,7 @@ export default class ChaveService {
         } else {
             console.log('Chaves de criptografia encontradas.'.magenta);
             process.env.CHAVE_JWT = existeChave.jwt.cache;
-            process.env.CHAVE_MENSAGENS = existeChave.mensagens.cache;
+            process.env.CHAVE_MENSAGENS = JSON.parse(existeChave.mensagens.cache).mensagem;
             await this.agendaProximaRotacao(await this.#cache.tempoDeVida('chaveMensagens'));
         }
     }
