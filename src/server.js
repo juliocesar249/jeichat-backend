@@ -11,7 +11,7 @@ import {limpezaService} from "./config/dependencias.js";
 
 const app = express();
 const servidor = http.createServer(app);
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.CONTAINER_PORT  || 3000;
 
 app.use(cors({
     origin: ['http://127.0.0.1:4000', 'http://localhost:4000'],
@@ -29,4 +29,4 @@ app.use(errorHandler);
 iniciaWebSocket(servidor);
 await limpezaService.iniciar();
 
-servidor.listen(PORT, () => console.log(`Servidor aberto em http://localhost:${PORT}`.cyan));
+servidor.listen(process.env.PORT || 3000, () => console.log(`Servidor aberto em http://localhost:${PORT}`.cyan));

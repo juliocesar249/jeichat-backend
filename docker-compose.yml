@@ -4,7 +4,7 @@ services:
     image: jeichat:1.0.0
     container_name: jeichat-servidor
     ports:
-      - '${PORT}:3000'
+      - '${HOST_PORT}:3000'
     restart: unless-stopped
     environment:
       - PORT=${PORT}
@@ -16,6 +16,7 @@ services:
       - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - DOCKER=true
+      - CONTAINER_PORT=3000
     depends_on:
       postgres:
         condition: service_healthy
