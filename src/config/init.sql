@@ -28,9 +28,9 @@ CREATE TABLE chaves_publicas (
 );
 
 CREATE TABLE nonces_usuario (
-    id         INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id         SERIAL PRIMARY KEY,
     nonce      TEXT NOT NULL,
-    id_usuario UUID REFERENCES usuarios (id) NOT NULL ON DELETE CASCADE,
+    id_usuario UUID REFERENCES usuarios (id) ON DELETE CASCADE NOT NULL,
     criado_em  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE (nonce, id_usuario)
 );
@@ -38,8 +38,8 @@ CREATE TABLE nonces_usuario (
 CREATE TABLE tarefas_agendadas (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     nome_tarefa VARCHAR(255) NOT NULL,
-    proxima_execucao TIMESTAMPTZ NOT NULL CHECK (proxima_execucao > CURRENT_DATE),
-    status VARCHAR(255) DEFAULT 'AGENDADO' CHECK (status = 'AGENDADO' OR status = 'EXECUTANDO' OR status = 'EXECUTADO' or STATUS = 'FALHOU')
+    proxima_execucao TIMESTAMPTZ NOT NULL,
+    status VARCHAR(255) DEFAULT 'AGENDADO' CHECK (status IN ('AGENDADO', 'EXECUTANDO', 'EXECUTADO', 'FALHOU'))
 );
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE usuarios TO app_user;
