@@ -30,7 +30,6 @@ Clone o repositório e instale as dependências do Node.js.
 ```bash
 git clone https://github.com/seu-usuario/jeichat-backend.git
 cd jeichat-backend
-npm install
 ```
 
 ### 2. Variáveis de Ambiente
@@ -58,6 +57,9 @@ DOCKER=true
 PORT=3000
 ```
 
+> Caso queira executar o servidor fora do ambiente Docker, defina DOCKER em .env como `false` e execute `npm install`. Após colocar
+> os serviços de banco de dados e cache no docker, basta rodar `npm run server`.
+
 ### 3. Iniciando os Serviços com Docker
 
 Este projeto utiliza Docker Compose para orquestrar os três bancos de dados (PostgreSQL, MongoDB, Redis) de forma simples e rápida.
@@ -70,17 +72,10 @@ docker-compose up -d
 
 Este comando irá baixar as imagens necessárias e iniciar os contêineres dos bancos de dados em segundo plano.
 
-### 4. Iniciando o Servidor Node.js
-
-Após os contêineres do Docker estarem em execução, você pode iniciar o servidor da aplicação:
-
-```bash
-npm run server
-```
 
 O servidor estará disponível em `http://localhost:3000` (ou na porta que você configurar).
 
-### 5. Parando os Serviços
+### 4. Parando os Serviços
 
 Para parar os contêineres dos bancos de dados, utilize:
 
